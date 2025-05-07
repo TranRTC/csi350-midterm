@@ -1,11 +1,4 @@
-# define the data model for the app
-from flask_sqlalchemy import SQLAlchemy
-
-# Initialize SQLAlchemy | a database instance
-db = SQLAlchemy()
-
-
-
+# models.py
 from flask_sqlalchemy import SQLAlchemy
 from datetime import date
 
@@ -14,7 +7,7 @@ db = SQLAlchemy()
 
 # Define the Movie model
 class Movie(db.Model):
-    __tablename__ = 'movies'
+    __tablename__ = 'movies'  # Table name in the database
 
     # Define fields
     id = db.Column(db.Integer, primary_key=True)  # Primary Key
@@ -23,6 +16,5 @@ class Movie(db.Model):
     rating = db.Column(db.Float, nullable=False)  # Required field
     release_date = db.Column(db.Date, nullable=False)  # Required field
 
-    # Optional: __repr__ method to represent the object as a string
     def __repr__(self):
         return f"<Movie id={self.id}, title={self.title}, rating={self.rating}, release_date={self.release_date}>"

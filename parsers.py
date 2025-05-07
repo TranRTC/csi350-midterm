@@ -1,7 +1,7 @@
 # parsers.py
 from flask_restful import reqparse
 
-# Define a parser to handle movie data
+# Define the request parser for movie creation
 movie_parser = reqparse.RequestParser()
 movie_parser.add_argument('title', type=str, required=True, help="Title cannot be blank")
 movie_parser.add_argument('description', type=str)
