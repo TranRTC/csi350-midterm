@@ -6,6 +6,7 @@ from models import db, Movie
 from parsers import movie_parser
 from serializers import movie_fields
 from flask_migrate import Migrate
+from datetime import datetime
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -25,73 +26,81 @@ def home():
     return "Welcome to the Flask CRUD API!"
 
 # Define the MovieResource class for CRUD operations
-class MovieResource(Resource):
-    # Read: GET /movies - Get a list of all movies
+# === Movie List Resource: GET all, POST new ===
+class MovieListResource(Resource):
     @marshal_with(movie_fields)
     def get(self):
-        # Retrieve all movies from the database
         movies = Movie.query.all()
         return movies
 
-    # Read: GET /movies/<id> - Get a specific movie by ID
-    @marshal_with(movie_fields)
-    def get(self, id):
-        # Retrieve a specific movie by its ID
-        movie = Movie.query.get_or_404(id)  # Return 404 if movie is not found
-        return movie
-
-    # Create: POST /movies - Create a new movie from the provided JSON data
     def post(self):
-        # Parse the incoming data from the request body (JSON)
         args = movie_parser.parse_args()
-
-        # Create a new Movie object with the parsed data
         new_movie = Movie(
             title=args['title'],
             description=args['description'],
             rating=args['rating'],
             release_date=args['release_date']
         )
+        db.session.add(new_movie)
+        db.session.commit()
+        return {'message': 'Movie created', 'movie': args['title']}, 201
 
-        # Add the new movie to the session and commit to the database
+
+# === Movie Resource: GET one, PUT, DELETE ===
+# === Movie List Resource: GET all, POST new ===
+class MovieListResource(Resource):
+    @marshal_with(movie_fields)
+    def get(self):
+        movies = Movie.query.all()
+        return movies
+
+    def post(self):
+        args = movie_parser.parse_args()
+        release_date = datetime.strptime(args['release_date'], "%Y-%m-%d").date()
+
+        new_movie = Movie(
+            title=args['title'],
+            description=args['description'],
+            rating=args['rating'],
+            release_date=release_date
+        )
+
         db.session.add(new_movie)
         db.session.commit()
 
-        return {'message': 'Movie created', 'movie': args['title']}, 201  # Return the created movie info
+        return {'message': 'Movie created', 'movie': args['title']}, 201
 
-    # Update: PUT /movies/<id> - Update a movie by ID
-    def put(self, id):
-        # Parse the incoming data from the request body (JSON)
-        args = movie_parser.parse_args()
 
-        # Retrieve the movie by its ID
+# === Movie Resource: GET one, PUT, DELETE ===
+class MovieResource(Resource):
+    @marshal_with(movie_fields)
+    def get(self, id):
         movie = Movie.query.get_or_404(id)
+        return movie
 
-        # Update the movie attributes
+    def put(self, id):
+        args = movie_parser.parse_args()
+        release_date = datetime.strptime(args['release_date'], "%Y-%m-%d").date()
+
+        movie = Movie.query.get_or_404(id)
         movie.title = args['title']
         movie.description = args['description']
         movie.rating = args['rating']
-        movie.release_date = args['release_date']
+        movie.release_date = release_date
 
-        # Commit the changes to the database
         db.session.commit()
+        return {'message': f'Movie with ID {id} updated'}, 200
 
-        return {'message': f'Movie with ID {id} updated', 'movie': args['title']}, 200
-
-    # Delete: DELETE /movies/<id> - Delete a movie by ID
     def delete(self, id):
-        # Retrieve the movie by its ID
         movie = Movie.query.get_or_404(id)
-
-        # Delete the movie from the database
         db.session.delete(movie)
         db.session.commit()
-
         return {'message': f'Movie with ID {id} deleted'}, 200
 
-# Define the routes for the API
-api.add_resource(MovieResource, '/movies', '/movies/<int:id>')
 
+# === API Route Bindings ===
+api.add_resource(MovieListResource, '/movies')             # GET (all), POST
+api.add_resource(MovieResource, '/movies/<int:id>')        # GET (by ID), PUT, DELETE
 # Run the server
 if __name__ == '__main__':
     app.run(debug=True)
