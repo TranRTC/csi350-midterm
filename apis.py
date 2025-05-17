@@ -23,7 +23,7 @@ api = Api(app)
 # Home page route (this is your home route)
 @app.route('/')
 def home():
-    return "Welcome to the Flask CRUD API!"
+    return "Midterm: CRUD API with SQLAlchemy and Flask-RESTful"
 
 # Define the MovieResource class for CRUD operations
 # === Movie List Resource: GET all, POST new ===
