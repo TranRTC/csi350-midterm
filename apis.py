@@ -11,8 +11,7 @@ from datetime import datetime
 # Initialize Flask app
 app = Flask(__name__)
 
-
-
+# Load configuration from the Config class
 app.config.from_object(Config)
 
 # Initialize the database and migrations
@@ -25,28 +24,7 @@ api = Api(app)
 def home():
     return "Midterm: CRUD API with SQLAlchemy and Flask-RESTful"
 
-# Define the MovieResource class for CRUD operations
-# === Movie List Resource: GET all, POST new ===
-class MovieListResource(Resource):
-    @marshal_with(movie_fields)
-    def get(self):
-        movies = Movie.query.all()
-        return movies
 
-    def post(self):
-        args = movie_parser.parse_args()
-        new_movie = Movie(
-            title=args['title'],
-            description=args['description'],
-            rating=args['rating'],
-            release_date=args['release_date']
-        )
-        db.session.add(new_movie)
-        db.session.commit()
-        return {'message': 'Movie created', 'movie': args['title']}, 201
-
-
-# === Movie Resource: GET one, PUT, DELETE ===
 # === Movie List Resource: GET all, POST new ===
 class MovieListResource(Resource):
     @marshal_with(movie_fields)
